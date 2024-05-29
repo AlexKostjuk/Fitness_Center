@@ -53,7 +53,6 @@ def user_reservations_list_info():
     return 'user reservations list'
 
 
-
 @app.get('/reservations/<reservation_id>')
 def user_reservations_info(reservation_id):
     return f'user reservations {reservation_id} info'
@@ -126,7 +125,6 @@ def update_coach_score(gym_id, coach_id):
 @app.get('/fitness_center/<gym_id>/loyality_programs')
 def get_loyality_programs(gym_id):
     return f'fitness center {gym_id} loyality_programs list'
-
 
 
 if __name__ == '__main__':
