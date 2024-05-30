@@ -1,16 +1,64 @@
 
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 
+import sqlite3
+
+
+def dict_factory(cursor, row):
+    d={}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+def get_from_db(qvery, many=True):
+    con = sqlite3.connect('db')
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    cur.execute(qvery)
+    if many:
+        res = cur.fetchall()
+    else:
+        res = cur.fetchone()
+    con.close()
+    return res
+
+
+def insert_to_db(qvery):
+    con = sqlite3.connect('db')
+    cur = con.cursor()
+    cur.execute(qvery)
+    con.commit()
+    con.close()
 
 @app.post('/register')
 def new_user_register():
+    from_data = request.form
+    # print(from_data)
+    # g = f"tttttt {from_data['login']}, {from_data['password']}, {from_data['birth_date']}, {from_data['phone']}"
+    # print(g)
+    a = f"INSERT INTO user (login, password, birth_date, phone) VALUES ('{from_data['login']}', '{from_data['password']}', '{from_data['birth_date']}', '{from_data['phone']}')"
+    # print(a)
+
+    insert_to_db(a)
     return 'new user register'
 
 @app.get('/register')
 def user_register_invitation():
-    return 'please sing in to register'
+    return  f"""<form action='/register' method="POST">
+  <label for="login">login:</label><br>
+  <input type="text" id="login" name="login"><br>
+  <label for="password">password:</label><br>
+  <input type="password" id="password" name="password">
+  <label for="birth_date">birth_date:</label><br>
+  <input type="date" id="birth_date" name="birth_date">
+  <label for="phone">phone:</label><br>
+  <input type="text" id="phone" name="phone">
+  
+  <input type="submit" value="Submit">
+</form>"""
 
 
 @app.post('/login')
@@ -28,7 +76,11 @@ def add_user_info():
 
 @app.get('/user')
 def user_info():
-    return 'user information'
+    res = get_from_db('select * from user where id=1')
+
+
+    return str(res)
+
 
 @app.put('/user')
 def user_update():
@@ -41,6 +93,7 @@ def add_funds():
 
 @app.get('/funds')
 def user_deposit_info():
+
     return 'user deposit value'
 
 
@@ -81,32 +134,42 @@ def update_checkout_order_service():
 
 @app.get('/fitness_center')
 def get_fitness_center():
-    return 'fitness center list'
+    res = get_from_db('select name, address from fitness_center')
+    return str(res)
 
 
 @app.get('/fitness_center/<gym_id>')
 def get_fitness_center_info(gym_id):
-    return f'fitness center {gym_id} info'
+    res = get_from_db(f'select name, address from fitness_center where id={gym_id}', False)
+    return str(res)
 
 
-@app.get('/fitness_center/<gym_id>/services')
+@app.get('/fitness_center/<gym_id>/service')
 def get_service(gym_id):
-    return f'fitness center {gym_id} services list'
+    res = get_from_db(f'select name from service where fitness_center_id={gym_id}')
+
+    return f'fitness center {gym_id} service list {res}'
 
 
-@app.get('/fitness_center/<gym_id>/services/<service_id>')
+@app.get('/fitness_center/<gym_id>/service/<service_id>')
 def get_service_info(gym_id, service_id):
-    return f'fitness center {gym_id} service {service_id} info'
+    res = get_from_db(f'select * from service where fitness_center_id={gym_id} AND id={service_id}')
+
+    return f'fitness center {gym_id} service {service_id} info {res}'
 
 
 @app.get('/fitness_center/<gym_id>/trainer')
 def get_trainer(gym_id):
-    return f'fitness center {gym_id} trainer list'
+    res = get_from_db(f'select name from trainer where fitness_center_id={gym_id}')
+
+    return f'fitness center {gym_id} trainer list {res}'
 
 
 @app.get('/fitness_center/<gym_id>/trainer/<coach_id>')
 def get_coach_info(gym_id, coach_id):
-    return f'fitness center {gym_id} trainer {coach_id} info'
+    res = get_from_db(f'select * from trainer where fitness_center_id={gym_id} AND id={coach_id}')
+
+    return f'fitness center {gym_id} trainer {coach_id} info {res}'
 
 
 @app.get('/fitness_center/<gym_id>/trainer/<coach_id>/score')
