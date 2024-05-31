@@ -67,7 +67,15 @@ def user_login():
 
 @app.get('/login')
 def user_login_form():
-    return 'please enter credentials'
+    return f""" <form id="loginForm">
+        <label for="login">login:</label>
+        <input type="text" id="login" name="login" required>
+        <br>
+        <label for="password">password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <input type="submit" value="Войти">
+    </form>"""
 
 
 @app.post('/user')
@@ -79,7 +87,7 @@ def user_info():
     res = get_from_db('select * from user where id=1')
 
 
-    return str(res)
+    return res
 
 
 @app.put('/user')
@@ -93,8 +101,10 @@ def add_funds():
 
 @app.get('/funds')
 def user_deposit_info():
+    res = get_from_db('select funds from user where id=1')
 
-    return 'user deposit value'
+
+    return f'user deposit {res}'
 
 
 @app.post('/reservations')
@@ -103,12 +113,17 @@ def add_reservations():
 
 @app.get('/reservations')
 def user_reservations_list_info():
-    return 'user reservations list'
+    res = get_from_db('select service_id from reservation where user_id=1')
+
+    return f'user reservations list {res}'
 
 
 @app.get('/reservations/<reservation_id>')
 def user_reservations_info(reservation_id):
-    return f'user reservations {reservation_id} info'
+    res = get_from_db(f'select * from reservation where user_id=1')
+
+
+    return f'user reservations {reservation_id} info {res[int(reservation_id) - 1]}'
 
 @app.put('/reservations/<reservation_id>')
 def update_reservations(reservation_id):
@@ -125,7 +140,8 @@ def add_checkout_order_service():
 
 @app.get('/checkout')
 def checkout_info():
-    return 'checkout info'
+    res = get_from_db(f'select name, price from service ')
+    return f'checkout info oll servises {res}'
 
 @app.put('/checkout')
 def update_checkout_order_service():
@@ -135,13 +151,13 @@ def update_checkout_order_service():
 @app.get('/fitness_center')
 def get_fitness_center():
     res = get_from_db('select name, address from fitness_center')
-    return str(res)
+    return res
 
 
 @app.get('/fitness_center/<gym_id>')
 def get_fitness_center_info(gym_id):
     res = get_from_db(f'select name, address from fitness_center where id={gym_id}', False)
-    return str(res)
+    return res
 
 
 @app.get('/fitness_center/<gym_id>/service')
@@ -165,29 +181,51 @@ def get_trainer(gym_id):
     return f'fitness center {gym_id} trainer list {res}'
 
 
-@app.get('/fitness_center/<gym_id>/trainer/<coach_id>')
-def get_coach_info(gym_id, coach_id):
-    res = get_from_db(f'select * from trainer where fitness_center_id={gym_id} AND id={coach_id}')
+@app.get('/fitness_center/<gym_id>/trainer/<trainer_id>')
+def get_coach_info(gym_id, trainer_id):
+    res = get_from_db(f'select * from trainer where fitness_center_id={gym_id} AND id={trainer_id}')
 
-    return f'fitness center {gym_id} trainer {coach_id} info {res}'
+    return f'fitness center {gym_id} trainer {trainer_id} info {res}'
 
 
-@app.get('/fitness_center/<gym_id>/trainer/<coach_id>/score')
-def get_coach_score(gym_id, coach_id):
-    return f'fitness center {gym_id} trainer {coach_id} score'
+@app.get('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
+def get_coach_score(gym_id, trainer_id):
 
-@app.post('/fitness_center/<gym_id>/trainer/<coach_id>/score')
-def set_coach_score(gym_id, coach_id):
-    return f'fitness center {gym_id} trainer {coach_id} score was added'
+    return f"""<form action='/fitness_center/<gym_id>/trainer/<trainer_id>/score' method="POST">
+  <label for="number">gym_id:</label><br>
+   <textarea id="gym_id" name="gym_id" rows="1" cols="3">{gym_id}</textarea><br>
+  <label for="number">trainer_id:</label><br>
+     <textarea id="trainer_id" name="trainer_id" rows="1" cols="3">{trainer_id}</textarea><br>
 
-@app.put('/fitness_center/<gym_id>/trainer/<coach_id>/score')
-def update_coach_score(gym_id, coach_id):
-    return f'fitness center {gym_id} trainer {coach_id} score was updated'
+
+  <label for="text">text:</label><br>
+  <input type="text" id="text" name="text"><br>
+  <label for="number">point:</label><br>
+  <input type="number" id="point" name="point">
+ 
+  
+  <input type="submit" value="Submit">
+</form>"""
+
+@app.post('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
+def set_coach_score(gym_id, trainer_id):
+    from_data = request.form
+
+    a = f"INSERT INTO review_rating (user_id, point, text, trainer_id, gym_id) VALUES ('1', '{from_data['point']}', '{from_data['text']}', '{from_data['trainer_id']}', '{from_data['gym_id']}')"
+
+    insert_to_db(a)
+    return f'fitness center {gym_id} trainer {trainer_id} score was added'
+
+@app.put('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
+def update_coach_score(gym_id, trainer_id):
+    return f'fitness center {gym_id} trainer {trainer_id} score was updated'
 
 
 @app.get('/fitness_center/<gym_id>/loyality_programs')
 def get_loyality_programs(gym_id):
-    return f'fitness center {gym_id} loyality_programs list'
+    res = get_from_db(f'select name from fitness_center where id={gym_id}')
+
+    return f'fitness center {res} loyality_programs list'
 
 
 if __name__ == '__main__':
