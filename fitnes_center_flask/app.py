@@ -196,8 +196,6 @@ def get_coach_score(gym_id, trainer_id):
    <textarea id="gym_id" name="gym_id" rows="1" cols="3">{gym_id}</textarea><br>
   <label for="number">trainer_id:</label><br>
      <textarea id="trainer_id" name="trainer_id" rows="1" cols="3">{trainer_id}</textarea><br>
-
-
   <label for="text">text:</label><br>
   <input type="text" id="text" name="text"><br>
   <label for="number">point:</label><br>
