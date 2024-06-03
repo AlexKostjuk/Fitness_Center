@@ -1,5 +1,5 @@
 from flask import Flask, request
-from SqlLIteDB import Dbsql
+from fitnes_center_flask.SqlLIteDB import Dbsql
 
 app = Flask(__name__)
 
