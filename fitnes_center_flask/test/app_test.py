@@ -1,5 +1,5 @@
 from flask import Flask, request
-from fitnes_center_flask.SqlLIteDB import Dbsql
+from SqlLIteDB_test import Dbsql
 
 app = Flask(__name__)
 
@@ -10,9 +10,10 @@ import sqlite3
 @app.post('/register')
 def new_user_register():
     from_data = request.form
-    a = f"INSERT INTO user (login, password, birth_date, phone) VALUES ('{from_data['login']}', '{from_data['password']}', '{from_data['birth_date']}', '{from_data['phone']}')"
+    table_bd = "user"
+    k_r = {'login' : from_data['login'], 'password' : from_data['password'], 'birth_date' : from_data['birth_date'], 'phone' : from_data['phone']}
     with Dbsql('db') as db:
-        db.insert_to_db(a)
+        db.insert_to_db(table_bd, k_r)
 
     # Dbsql.insert_to_db(a)
     return 'new user register'
@@ -59,9 +60,11 @@ def add_user_info():
 
 @app.get('/user')
 def user_info():
-    a = 'select * from user where id=1'
+    table = 'user'
+    conditions =
+    # a = 'select * from user where id=1'
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table)
 
     return res
 
@@ -145,9 +148,11 @@ def get_fitness_center():
 
 @app.get('/fitness_center/<gym_id>')
 def get_fitness_center_info(gym_id):
+    table = 'fitness_center'
+    conditions =
     a = f'select name, address from fitness_center where id={gym_id}'
     with Dbsql('db') as db:
-        res = db.fetch_one(a)
+        res = db.fetch_one(table, )
     return res
 
 
@@ -208,10 +213,11 @@ def get_coach_score(gym_id, trainer_id):
 def set_coach_score(gym_id, trainer_id):
     from_data = request.form
 
-    a = f"INSERT INTO review_rating (user_id, point, text, trainer_id, gym_id) VALUES ('1', '{from_data['point']}', '{from_data['text']}', '{from_data['trainer_id']}', '{from_data['gym_id']}')"
 
+    table_bd = "review_rating"
+    k_r = {'user_id': '1', 'point': from_data['point'], 'text': from_data['text'], 'trainer_id': from_data['trainer_id'], 'gym_id': from_data['gym_id']}
     with Dbsql('db') as db:
-        db.insert_to_db(a)
+        db.insert_to_db(table_bd, k_r)
     return f'fitness center {gym_id} trainer {trainer_id} score was added'
 
 
