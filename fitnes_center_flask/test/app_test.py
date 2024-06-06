@@ -1,10 +1,14 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from SqlLIteDB_test import Dbsql
 
 app = Flask(__name__)
 
 import sqlite3
 
+
+@app.route('/')
+def home():
+    return render_template('home.html')
 
 
 @app.post('/register')
@@ -21,18 +25,7 @@ def new_user_register():
 
 @app.get('/register')
 def user_register_invitation():
-    return f"""<form action='/register' method="POST">
-  <label for="login">login:</label><br>
-  <input type="text" id="login" name="login"><br>
-  <label for="password">password:</label><br>
-  <input type="password" id="password" name="password">
-  <label for="birth_date">birth_date:</label><br>
-  <input type="date" id="birth_date" name="birth_date">
-  <label for="phone">phone:</label><br>
-  <input type="text" id="phone" name="phone">
-
-  <input type="submit" value="Submit">
-</form>"""
+    return render_template("register.html")
 
 
 @app.post('/login')
@@ -61,11 +54,8 @@ def add_user_info():
 @app.get('/user')
 def user_info():
     table = 'user'
-    conditions =
-    # a = 'select * from user where id=1'
     with Dbsql('db') as db:
         res = db.fetch_oll(table)
-
     return res
 
 
@@ -81,9 +71,15 @@ def add_funds():
 
 @app.get('/funds')
 def user_deposit_info():
-    a = 'select funds from user where id=1'
+    # a = 'select funds from user where id=1'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'user'
+    colons = 'funds'
+    condition = None
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
+    # return res
 
     return f'user deposit {res}'
 
@@ -95,19 +91,33 @@ def add_reservations():
 
 @app.get('/reservations')
 def user_reservations_list_info():
-    a = 'select service_id from reservation where user_id=1'
+    # a = 'select service_id from reservation where user_id=1'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'reservation'
+    colons = 'service_id'
+    condition = {'user_id': 1}
+
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
+    # return res
     return f'user reservations list {res}'
 
 
 @app.get('/reservations/<reservation_id>')
 def user_reservations_info(reservation_id):
-    a = f'select * from reservation where user_id=1'
+    # a = f'select * from reservation where user_id=1'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'reservation'
+    colons = None
+    condition = {'user_id': 1}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
 
-    return f'user reservations {reservation_id} info {res[int(reservation_id) - 1]}'
+        res = db.fetch_oll(table, colons, condition)
+    # return res
+
+    return f'user reservations {reservation_id} info {res}'
 
 
 @app.put('/reservations/<reservation_id>')
@@ -127,9 +137,14 @@ def add_checkout_order_service():
 
 @app.get('/checkout')
 def checkout_info():
-    a = f'select name, price from service '
+    # a = f'select name, price from service '
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'service'
+    colons = ['name', 'price']
+    condition = None
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
     return f'checkout info oll servises {res}'
 
 
@@ -140,54 +155,82 @@ def update_checkout_order_service():
 
 @app.get('/fitness_center')
 def get_fitness_center():
-    a = 'select name, address from fitness_center'
+    # a = 'select name, address from fitness_center'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'fitness_center'
+    colons = ['name', 'address']
+    condition = None
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
     return res
 
 
 @app.get('/fitness_center/<gym_id>')
 def get_fitness_center_info(gym_id):
-    table = 'fitness_center'
-    conditions =
+    # table = 'fitness_center'
+    # conditions =
     a = f'select name, address from fitness_center where id={gym_id}'
+    table = 'fitness_center'
+    colons = ['name', 'address']
+    condition = {'id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_one(table, )
+        res = db.fetch_one(table, colons, condition)
     return res
 
 
 @app.get('/fitness_center/<gym_id>/service')
 def get_service(gym_id):
     a = f'select name from service where fitness_center_id={gym_id}'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'service'
+    colons = ['name']
+    condition = {'fitness_center_id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
     return f'fitness center {gym_id} service list {res}'
 
 
 @app.get('/fitness_center/<gym_id>/service/<service_id>')
 def get_service_info(gym_id, service_id):
-    a = f'select * from service where fitness_center_id={gym_id} AND id={service_id}'
+    # a = f'select * from service where fitness_center_id={gym_id} AND id={service_id}'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'service'
+    colons = None
+    condition = {'fitness_center_id': gym_id, 'id': service_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
     return f'fitness center {gym_id} service {service_id} info {res}'
 
 
 @app.get('/fitness_center/<gym_id>/trainer')
 def get_trainer(gym_id):
-    a = f'select name from trainer where fitness_center_id={gym_id}'
+    # a = f'select name from trainer where fitness_center_id={gym_id}'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'trainer'
+    colons = ['name']
+    condition = {'fitness_center_id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
     return f'fitness center {gym_id} trainer list {res}'
 
 
 @app.get('/fitness_center/<gym_id>/trainer/<trainer_id>')
 def get_coach_info(gym_id, trainer_id):
-    a = f'select * from trainer where fitness_center_id={gym_id} AND id={trainer_id}'
+    # a = f'select * from trainer where fitness_center_id={gym_id} AND id={trainer_id}'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'trainer'
+    colons = None
+    condition = {'fitness_center_id': gym_id, 'id': trainer_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
     return f'fitness center {gym_id} trainer {trainer_id} info {res}'
 
@@ -228,9 +271,14 @@ def update_coach_score(gym_id, trainer_id):
 
 @app.get('/fitness_center/<gym_id>/loyality_programs')
 def get_loyality_programs(gym_id):
-    a = f'select name from fitness_center where id={gym_id}'
+    # a = f'select name from fitness_center where id={gym_id}'
+    # with Dbsql('db') as db:
+    #     res = db.fetch_oll(a)
+    table = 'fitness_center'
+    colons = ['name']
+    condition = {'id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
     return f'fitness center {res} loyality_programs list'
 
 
