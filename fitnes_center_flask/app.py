@@ -1,37 +1,29 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from SqlLIteDB import Dbsql
 
 app = Flask(__name__)
 
-import sqlite3
 
+
+@app.route('/')
+def home():
+    return render_template('home.html')
 
 
 @app.post('/register')
 def new_user_register():
     from_data = request.form
-    a = f"INSERT INTO user (login, password, birth_date, phone) VALUES ('{from_data['login']}', '{from_data['password']}', '{from_data['birth_date']}', '{from_data['phone']}')"
+    table_bd = "user"
+    k_r = {'login' : from_data['login'], 'password' : from_data['password'], 'birth_date' : from_data['birth_date'], 'phone' : from_data['phone']}
     with Dbsql('db') as db:
-        db.insert_to_db(a)
+        db.insert_to_db(table_bd, k_r)
 
-    # Dbsql.insert_to_db(a)
-    return 'new user register'
+    return render_template('register_add.html', login=from_data['login'])
 
 
 @app.get('/register')
 def user_register_invitation():
-    return f"""<form action='/register' method="POST">
-  <label for="login">login:</label><br>
-  <input type="text" id="login" name="login"><br>
-  <label for="password">password:</label><br>
-  <input type="password" id="password" name="password">
-  <label for="birth_date">birth_date:</label><br>
-  <input type="date" id="birth_date" name="birth_date">
-  <label for="phone">phone:</label><br>
-  <input type="text" id="phone" name="phone">
-
-  <input type="submit" value="Submit">
-</form>"""
+    return render_template("register.html")
 
 
 @app.post('/login')
@@ -41,15 +33,7 @@ def user_login():
 
 @app.get('/login')
 def user_login_form():
-    return f""" <form id="loginForm">
-        <label for="login">login:</label>
-        <input type="text" id="login" name="login" required>
-        <br>
-        <label for="password">password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <input type="submit" value="Войти">
-    </form>"""
+    return render_template('login.html')
 
 
 @app.post('/user')
@@ -59,11 +43,12 @@ def add_user_info():
 
 @app.get('/user')
 def user_info():
-    a = 'select * from user where id=1'
+    table = 'user'
+    colons = None
+    condition = {'id': 1}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
-
-    return res
+        res = db.fetch_oll(table, colons, condition)
+    return render_template("user.html", res = res)
 
 
 @app.put('/user')
@@ -78,11 +63,13 @@ def add_funds():
 
 @app.get('/funds')
 def user_deposit_info():
-    a = 'select funds from user where id=1'
+    table = 'user'
+    colons = 'funds'
+    condition = {'id': 1}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
-    return f'user deposit {res}'
+    return render_template("funds.html", res = res)
 
 
 @app.post('/reservations')
@@ -92,19 +79,25 @@ def add_reservations():
 
 @app.get('/reservations')
 def user_reservations_list_info():
-    a = 'select service_id from reservation where user_id=1'
+    table = 'reservation'
+    colons = 'service_id'
+    condition = {'user_id': 1}
+
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
-    return f'user reservations list {res}'
+        res = db.fetch_oll(table, colons, condition)
+    return render_template("reservations.html", res = res)
 
 
 @app.get('/reservations/<reservation_id>')
 def user_reservations_info(reservation_id):
-    a = f'select * from reservation where user_id=1'
+    table = 'reservation'
+    colons = None
+    condition = {'user_id': 1}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
 
-    return f'user reservations {reservation_id} info {res[int(reservation_id) - 1]}'
+        res = db.fetch_oll(table, colons, condition)
+
+    return render_template("reservation_id.html", reservation_id=reservation_id, res = res)
 
 
 @app.put('/reservations/<reservation_id>')
@@ -124,10 +117,12 @@ def add_checkout_order_service():
 
 @app.get('/checkout')
 def checkout_info():
-    a = f'select name, price from service '
+    table = 'service'
+    colons = ['name', 'price']
+    condition = None
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
-    return f'checkout info oll servises {res}'
+        res = db.fetch_oll(table, colons, condition)
+    return render_template("checkout.html", res=res)
 
 
 @app.put('/checkout')
@@ -137,82 +132,87 @@ def update_checkout_order_service():
 
 @app.get('/fitness_center')
 def get_fitness_center():
-    a = 'select name, address from fitness_center'
-    with Dbsql('db') as db:
-        res = db.fetch_oll(a)
-    return res
 
+    table = 'fitness_center'
+    colons = ['name', 'address']
+    condition = None
+    with Dbsql('db') as db:
+        res = db.fetch_oll(table, colons, condition)
+    return render_template("fitness_center.html", res = res)
 
 @app.get('/fitness_center/<gym_id>')
 def get_fitness_center_info(gym_id):
-    a = f'select name, address from fitness_center where id={gym_id}'
+
+    table = 'fitness_center'
+    colons = None
+    condition = {'id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_one(a)
-    return res
+        res = db.fetch_one(table, colons, condition)
+    return render_template("gym_id.html", res = res, gym_id=gym_id)
 
 
 @app.get('/fitness_center/<gym_id>/service')
 def get_service(gym_id):
-    a = f'select name from service where fitness_center_id={gym_id}'
+    table = 'service'
+    colons = ['name']
+    condition = {'fitness_center_id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
-    return f'fitness center {gym_id} service list {res}'
+    return render_template("service.html", res = res, gym_id=gym_id)
 
 
 @app.get('/fitness_center/<gym_id>/service/<service_id>')
 def get_service_info(gym_id, service_id):
-    a = f'select * from service where fitness_center_id={gym_id} AND id={service_id}'
+    table = 'service'
+    colons = None
+    condition = {'fitness_center_id': gym_id, 'id': service_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
-    return f'fitness center {gym_id} service {service_id} info {res}'
+    return render_template("service_id.html", res = res, service_id=service_id, gym_id=gym_id)
 
 
 @app.get('/fitness_center/<gym_id>/trainer')
 def get_trainer(gym_id):
-    a = f'select name from trainer where fitness_center_id={gym_id}'
+    table = 'trainer'
+    colons = ['name']
+    condition = {'fitness_center_id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
-    return f'fitness center {gym_id} trainer list {res}'
+    return render_template("trainer.html", res = res,  gym_id=gym_id)
 
 
 @app.get('/fitness_center/<gym_id>/trainer/<trainer_id>')
 def get_coach_info(gym_id, trainer_id):
-    a = f'select * from trainer where fitness_center_id={gym_id} AND id={trainer_id}'
+    table = 'trainer'
+    colons = None
+    condition = {'fitness_center_id': gym_id, 'id': trainer_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
+        res = db.fetch_oll(table, colons, condition)
 
-    return f'fitness center {gym_id} trainer {trainer_id} info {res}'
+    return render_template("trainer_id.html", res = res, trainer_id=trainer_id, gym_id=gym_id)
 
 
 @app.get('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
 def get_coach_score(gym_id, trainer_id):
-    return f"""<form action='/fitness_center/<gym_id>/trainer/<trainer_id>/score' method="POST">
-  <label for="number">gym_id:</label><br>
-   <textarea id="gym_id" name="gym_id" rows="1" cols="3">{gym_id}</textarea><br>
-  <label for="number">trainer_id:</label><br>
-     <textarea id="trainer_id" name="trainer_id" rows="1" cols="3">{trainer_id}</textarea><br>
-  <label for="text">text:</label><br>
-  <input type="text" id="text" name="text"><br>
-  <label for="number">point:</label><br>
-  <input type="number" id="point" name="point">
+    print(gym_id, trainer_id)
+    return render_template('score.html', gym_id=gym_id, trainer_id=trainer_id)
 
-
-  <input type="submit" value="Submit">
-</form>"""
+#
 
 
 @app.post('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
 def set_coach_score(gym_id, trainer_id):
     from_data = request.form
 
-    a = f"INSERT INTO review_rating (user_id, point, text, trainer_id, gym_id) VALUES ('1', '{from_data['point']}', '{from_data['text']}', '{from_data['trainer_id']}', '{from_data['gym_id']}')"
 
+    table_bd = "review_rating"
+    k_r = {'user_id': '1', 'point': from_data['point'], 'text': from_data['text'], 'trainer_id': from_data['trainer_id'], 'gym_id': from_data['gym_id']}
     with Dbsql('db') as db:
-        db.insert_to_db(a)
-    return f'fitness center {gym_id} trainer {trainer_id} score was added'
+        db.insert_to_db(table_bd, k_r)
+    return render_template('score_add.html', gym_id=from_data['gym_id'], trainer_id=from_data['trainer_id'])
 
 
 @app.put('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
@@ -222,10 +222,12 @@ def update_coach_score(gym_id, trainer_id):
 
 @app.get('/fitness_center/<gym_id>/loyality_programs')
 def get_loyality_programs(gym_id):
-    a = f'select name from fitness_center where id={gym_id}'
+    table = 'fitness_center'
+    colons = ['name']
+    condition = {'id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(a)
-    return f'fitness center {res} loyality_programs list'
+        res = db.fetch_oll(table, colons, condition)
+    return render_template('loyality_programs.html', res=res)
 
 
 
