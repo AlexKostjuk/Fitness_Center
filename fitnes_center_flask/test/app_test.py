@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, session, redirect
-from SqlLIteDB_test import Dbsql
+from SqlLIteDB_test import Dbsql, login_required
+
 import sqlite3
+
 
 
 app = Flask(__name__)
@@ -15,8 +17,10 @@ def check_existence(username, password):
     return user is not None
 
 
-@app.route('/')
+@app.get('/')
 def home():
+    # user_id = session.get('user_id', None)
+
     return render_template('home.html')
 
 
@@ -59,7 +63,8 @@ def user_login_form():
     user = session.get('user_id', None)
     if user:
         return redirect('/user')
-    return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 
 @app.get('/bad_login_or_password')
@@ -78,17 +83,16 @@ def add_user_info():
 
 
 @app.get('/user')
+@login_required
+
 def user_info():
-    user = session.get('user_id', None)
-    if user:
-        table = 'user'
-        colons = None
-        condition = {'id': user}
-        with Dbsql('db') as db:
-            res = db.fetch_oll(table, colons, condition)
-        return render_template("user.html", res = res)
-    else:
-        return redirect('/login')
+    user_id = session.get('user_id', None)
+    table = 'user'
+    colons = None
+    condition = {'id': user_id}
+    with Dbsql('db') as db:
+        res = db.fetch_oll(table, colons, condition)
+    return render_template("user.html", res = res)
 
 
 
@@ -103,13 +107,17 @@ def add_funds():
 
 
 @app.get('/funds')
+@login_required
+
 def user_deposit_info():
+    user_id = session.get('user_id', None)
+
     # a = 'select funds from user where id=1'
     # with Dbsql('db') as db:
     #     res = db.fetch_oll(a)
     table = 'user'
     colons = 'funds'
-    condition = {'id': 1}
+    condition = {'id': user_id}
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
     # return res
@@ -123,13 +131,17 @@ def add_reservations():
 
 
 @app.get('/reservations')
+@login_required
+
 def user_reservations_list_info():
+    user_id = session.get('user_id', None)
+
     # a = 'select service_id from reservation where user_id=1'
     # with Dbsql('db') as db:
     #     res = db.fetch_oll(a)
     table = 'reservation'
     colons = 'service_id'
-    condition = {'user_id': 1}
+    condition = {'user_id': user_id}
 
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
@@ -138,13 +150,17 @@ def user_reservations_list_info():
 
 
 @app.get('/reservations/<reservation_id>')
+@login_required
+
 def user_reservations_info(reservation_id):
+    user_id = session.get('user_id', None)
+
     # a = f'select * from reservation where user_id=1'
     # with Dbsql('db') as db:
     #     res = db.fetch_oll(a)
     table = 'reservation'
     colons = None
-    condition = {'user_id': 1}
+    condition = {'user_id': user_id}
     with Dbsql('db') as db:
 
         res = db.fetch_oll(table, colons, condition)
@@ -268,6 +284,8 @@ def get_coach_info(gym_id, trainer_id):
 
 
 @app.get('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
+@login_required
+
 def get_coach_score(gym_id, trainer_id):
     print(gym_id, trainer_id)
     return render_template('score.html', gym_id=gym_id, trainer_id=trainer_id)
@@ -289,14 +307,21 @@ def get_coach_score(gym_id, trainer_id):
 
 @app.post('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
 def set_coach_score(gym_id, trainer_id):
+    user_id = session.get('user_id', None)
     from_data = request.form
-
-
     table_bd = "review_rating"
-    k_r = {'user_id': '1', 'point': from_data['point'], 'text': from_data['text'], 'trainer_id': from_data['trainer_id'], 'gym_id': from_data['gym_id']}
+    k_r = {'user_id': user_id, 'point': from_data['point'], 'text': from_data['text'], 'trainer_id': from_data['trainer_id'], 'gym_id': from_data['gym_id']}
     with Dbsql('db') as db:
-        db.insert_to_db(table_bd, k_r)
-    return render_template('score_add.html', gym_id=from_data['gym_id'], trainer_id=from_data['trainer_id'])
+        table = 'review_rating'
+        colons = None
+        condition = {'gym_id': from_data['gym_id'], 'trainer_id': from_data['trainer_id'], 'user_id': user_id}
+        res = db.fetch_one(table, colons, condition)
+        if res is None:
+            db.insert_to_db(table_bd, k_r)
+            return render_template('score_add.html', gym_id=from_data['gym_id'], trainer_id=from_data['trainer_id'])
+        else:
+            db.update_db(table=table_bd, data=k_r, condition=condition)
+            return render_template('score_add.html', gym_id=from_data['gym_id'], trainer_id=from_data['trainer_id'])
 
 
 @app.put('/fitness_center/<gym_id>/trainer/<trainer_id>/score')

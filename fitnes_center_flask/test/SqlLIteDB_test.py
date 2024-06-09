@@ -1,4 +1,8 @@
 import sqlite3
+from flask import Flask, request, render_template, session, redirect
+from functools import wraps
+
+
 def dict_factory(cursor, row):
     d={}
     for idx, col in enumerate(cursor.description):
@@ -120,4 +124,26 @@ class Dbsql:
         cursor.execute(qvery)
         self.connection.commit()
 
+    def update_db(self, table, data, condition):
+        keys = []
+        vals = []
+        for key, value in data.items():
+            keys.append(key)
+            vals.append("'" + str(value) + "'")
+        str_keys_vals = ', '.join([f"{key} = {val}" for key, val in zip(keys, vals)])
+        query = f"UPDATE {table} SET {str_keys_vals} WHERE {condition}"
 
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        self.connection.commit()
+
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if session.get('user_id') is None:
+            return redirect('/login')
+        results = func(*args, **kwargs)
+        return results
+    return wrapper
