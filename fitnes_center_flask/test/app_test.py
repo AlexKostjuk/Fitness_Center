@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 import sqlite3
 
-
 @app.route('/')
 def home():
     return render_template('home.html')
