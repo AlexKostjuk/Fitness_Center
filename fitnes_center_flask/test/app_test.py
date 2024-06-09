@@ -1,9 +1,19 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, session, redirect
 from SqlLIteDB_test import Dbsql
+import sqlite3
+
 
 app = Flask(__name__)
+app.secret_key = "mzdfhgvbdatJT67tdcghb"
 
-import sqlite3
+def check_existence(username, password):
+    table = 'user'
+    colons = None
+    condition = {'login': username, 'password': password}
+    with Dbsql('db') as db:
+        user = db.fetch_one(table, colons, condition)
+    return user is not None
+
 
 @app.route('/')
 def home():
@@ -29,13 +39,38 @@ def user_register_invitation():
 
 @app.post('/login')
 def user_login():
-    return 'new user is login in'
+    from_data = request.form
+    login = request.form['login']
+    password = request.form['password']
+    if check_existence(login, password):
+        with Dbsql('db') as db:
+            table = 'user'
+            colons = None
+            condition = {'login': login}
+            user = db.fetch_one(table, colons, condition)
+        session['user_id'] = user['id']
+        return redirect('/user')
+    else:
+        return redirect('/bad_login_or_password')
 
 
 @app.get('/login')
 def user_login_form():
+    user = session.get('user_id', None)
+    if user:
+        return redirect('/user')
     return render_template('login.html')
 
+
+@app.get('/bad_login_or_password')
+def bad_login():
+    return render_template('bad_login_or_password.html')
+
+
+@app.get('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect('/login')
 
 @app.post('/user')
 def add_user_info():
@@ -44,12 +79,17 @@ def add_user_info():
 
 @app.get('/user')
 def user_info():
-    table = 'user'
-    colons = None
-    condition = {'id': 1}
-    with Dbsql('db') as db:
-        res = db.fetch_oll(table, colons, condition)
-    return render_template("user.html", res = res)
+    user = session.get('user_id', None)
+    if user:
+        table = 'user'
+        colons = None
+        condition = {'id': user}
+        with Dbsql('db') as db:
+            res = db.fetch_oll(table, colons, condition)
+        return render_template("user.html", res = res)
+    else:
+        return redirect('/login')
+
 
 
 @app.put('/user')
