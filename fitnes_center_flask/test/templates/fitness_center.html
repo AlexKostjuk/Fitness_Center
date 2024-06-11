@@ -1,10 +1,22 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Список фитнес-центров</title>
 </head>
 <body>
-oll fitness center {{res}}
+<table>
+    <tr>
+        <th>Название</th>
+        <th>Адрес</th>
+    </tr>
+    {% for center in res %}
+        <tr>
+            <td><a href="/fitness_center/{{ center.id }}">{{ center.name }}</a></td>
+            <td>{{ center.address }}</td>
+        </tr>
+    {% endfor %}
+</table>
 </body>
 </html>

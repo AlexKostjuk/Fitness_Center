@@ -208,10 +208,11 @@ def get_fitness_center():
     # with Dbsql('db') as db:
     #     res = db.fetch_oll(a)
     table = 'fitness_center'
-    colons = ['name', 'address']
+    colons = ['name', 'address','id']
     condition = None
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
+        # print(type(res),res)
     return render_template("fitness_center.html", res = res)
 
 @app.get('/fitness_center/<gym_id>')
