@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template, session, redirect
 from SqlLIteDB import Dbsql, login_required
 
-import sqlite3
 
 
 
@@ -19,7 +18,6 @@ def check_existence(username, password):
 
 @app.get('/')
 def home():
-    # user_id = session.get('user_id', None)
 
     return render_template('home.html')
 
@@ -112,15 +110,11 @@ def add_funds():
 def user_deposit_info():
     user_id = session.get('user_id', None)
 
-    # a = 'select funds from user where id=1'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
     table = 'user'
     colons = 'funds'
     condition = {'id': user_id}
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
-    # return res
 
     return render_template("funds.html", res = res)
 
@@ -136,9 +130,6 @@ def add_reservations():
 def user_reservations_list_info():
     user_id = session.get('user_id', None)
 
-    # a = 'select service_id from reservation where user_id=1'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
     table = 'reservation'
     colons = 'service_id'
     condition = {'user_id': user_id}
@@ -146,7 +137,6 @@ def user_reservations_list_info():
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
         print(res)
-    # return res
     return render_template("reservations.html", res = res)
 
 @app.post('/delete_reservation/<reservation_id>')
@@ -170,16 +160,13 @@ def delete_reservation(reservation_id):
 def user_reservations_info(reservation_id):
     user_id = session.get('user_id', None)
 
-    # a = f'select * from reservation where user_id=1'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'reservation'
     colons = None
     condition = {'user_id': user_id}
     with Dbsql('db') as db:
 
         res = db.fetch_oll(table, colons, condition)
-    # return res
 
     return render_template("reservation_id.html", reservation_id=reservation_id, res = res)
 
@@ -201,9 +188,7 @@ def add_checkout_order_service():
 
 @app.get('/checkout')
 def checkout_info():
-    # a = f'select name, price from service '
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'service'
     colons = ['name', 'price']
     condition = None
@@ -219,9 +204,7 @@ def update_checkout_order_service():
 
 @app.get('/fitness_center')
 def get_fitness_center():
-    # a = 'select name, address from fitness_center'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'fitness_center'
     colons = ['name_fc', 'address','id']
     condition = None
@@ -232,9 +215,7 @@ def get_fitness_center():
 
 @app.get('/fitness_center/<gym_id>')
 def get_fitness_center_info(gym_id):
-    # table = 'fitness_center'
-    # conditions =
-    # a = f'select name, address from fitness_center where id={gym_id}'
+
     table = 'fitness_center'
     colons = None
     condition = {'fitness_center.id': gym_id}
@@ -247,8 +228,7 @@ def get_fitness_center_info(gym_id):
 @app.get('/fitness_center/<gym_id>/service')
 def get_service(gym_id):
     a = f'select name from service where fitness_center_id={gym_id}'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'service'
     colons = ['name']
     condition = {'fitness_center_id': gym_id}
@@ -260,9 +240,7 @@ def get_service(gym_id):
 
 @app.get('/fitness_center/<gym_id>/service/<service_id>')
 def get_service_info(gym_id, service_id):
-    # a = f'select * from service where fitness_center_id={gym_id} AND id={service_id}'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'service'
     colons = None
     condition = {'fitness_center_id': gym_id, 'id': service_id}
@@ -274,9 +252,7 @@ def get_service_info(gym_id, service_id):
 
 @app.get('/fitness_center/<gym_id>/trainer')
 def get_trainer(gym_id):
-    # a = f'select name from trainer where fitness_center_id={gym_id}'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'trainer'
     colons = ['name']
     condition = {'fitness_center_id': gym_id}
@@ -288,9 +264,7 @@ def get_trainer(gym_id):
 
 @app.get('/fitness_center/<gym_id>/trainer/<trainer_id>')
 def get_coach_info(gym_id, trainer_id):
-    # a = f'select * from trainer where fitness_center_id={gym_id} AND id={trainer_id}'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'trainer'
     colons = None
     condition = {'fitness_center_id': gym_id, 'id': trainer_id}
@@ -307,19 +281,7 @@ def get_coach_score(gym_id, trainer_id):
     print(gym_id, trainer_id)
     return render_template('score.html', gym_id=gym_id, trainer_id=trainer_id)
 
-#     return f"""<form action='/fitness_center/<gym_id>/trainer/<trainer_id>/score' method="POST">
-#   <label for="number">gym_id:</label><br>
-#    <textarea id="gym_id" name="gym_id" rows="1" cols="3">{gym_id}</textarea><br>
-#   <label for="number">trainer_id:</label><br>
-#      <textarea id="trainer_id" name="trainer_id" rows="1" cols="3">{trainer_id}</textarea><br>
-#   <label for="text">text:</label><br>
-#   <input type="text" id="text" name="text"><br>
-#   <label for="number">point:</label><br>
-#   <input type="number" id="point" name="point">
 #
-#
-#   <input type="submit" value="Submit">
-# </form>"""
 
 
 @app.post('/fitness_center/<gym_id>/trainer/<trainer_id>/score')
@@ -348,9 +310,7 @@ def update_coach_score(gym_id, trainer_id):
 
 @app.get('/fitness_center/<gym_id>/loyality_programs')
 def get_loyality_programs(gym_id):
-    # a = f'select name from fitness_center where id={gym_id}'
-    # with Dbsql('db') as db:
-    #     res = db.fetch_oll(a)
+
     table = 'fitness_center'
     colons = ['name']
     condition = {'id': gym_id}

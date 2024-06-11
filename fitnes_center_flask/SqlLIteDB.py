@@ -64,8 +64,7 @@ class Dbsql:
 
 
     def fetch_one(self, table, colons = None, condition = None, join_table = None, join_condition = None):
-        # join_condition =
-        # qvery = f'select * from {table}'
+
         if colons is not None:
             print(colons, len(colons))
             if type(colons) == list:
@@ -106,13 +105,6 @@ class Dbsql:
             return res
         return None
 
-    # def fetch_one(self, qvery, *args, **kwargs):
-    #     cursor = self.connection.cursor()
-    #     cursor.execute(qvery, *args, **kwargs)
-    #     res = cursor.fetchone()
-    #     if res:
-    #         return res
-    #     return None
 
     def insert_to_db(self, table, data):
         keys = []
