@@ -131,7 +131,13 @@ class Dbsql:
             keys.append(key)
             vals.append("'" + str(value) + "'")
         str_keys_vals = ', '.join([f"{key} = {val}" for key, val in zip(keys, vals)])
-        query = f"UPDATE {table} SET {str_keys_vals} WHERE {condition}"
+        keys_c = []
+        vals_c = []
+        for key, value in condition.items():
+            keys_c.append(key)
+            vals_c.append("'" + str(value) + "'")
+        str_keys_vals_c = ' AND '.join([f"{key} = {val}" for key, val in zip(keys_c, vals_c)])
+        query = f"UPDATE {table} SET {str_keys_vals} WHERE {str_keys_vals_c}"
 
         cursor = self.connection.cursor()
         cursor.execute(query)
