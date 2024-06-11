@@ -145,9 +145,24 @@ def user_reservations_list_info():
 
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
+        print(res)
     # return res
     return render_template("reservations.html", res = res)
 
+@app.post('/delete_reservation/<reservation_id>')
+
+def delete_reservation(reservation_id):
+    user_id = session.get('user_id', None)
+    from_data = request.form
+    service_id = from_data.get('service_id')
+    print(service_id)
+
+    table = 'reservation'
+    condition = {'user_id': user_id, 'service_id' : service_id }
+    print(table, condition)
+    with Dbsql('db') as db:
+        db.delete_from_db(table, condition)
+    return redirect('/')
 
 @app.get('/reservations/<reservation_id>')
 @login_required
@@ -208,11 +223,11 @@ def get_fitness_center():
     # with Dbsql('db') as db:
     #     res = db.fetch_oll(a)
     table = 'fitness_center'
-    colons = ['name', 'address','id']
+    colons = ['name_fc', 'address','id']
     condition = None
     with Dbsql('db') as db:
         res = db.fetch_oll(table, colons, condition)
-        # print(type(res),res)
+        print(type(res),res)
     return render_template("fitness_center.html", res = res)
 
 @app.get('/fitness_center/<gym_id>')
@@ -222,9 +237,10 @@ def get_fitness_center_info(gym_id):
     # a = f'select name, address from fitness_center where id={gym_id}'
     table = 'fitness_center'
     colons = None
-    condition = {'id': gym_id}
+    condition = {'fitness_center.id': gym_id}
+    join_condition = {'service.fitness_center_id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_one(table, colons, condition)
+        res = db.fetch_oll(table, colons, condition, join_table = 'service',join_condition=join_condition)
     return render_template("gym_id.html", res = res, gym_id=gym_id)
 
 

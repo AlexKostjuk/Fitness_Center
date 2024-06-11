@@ -80,11 +80,15 @@ class Dbsql:
         conditions = []
 
         if join_table is not None:
-            join_cond_list = []
-            for key, val in join_condition.items():
-                join_cond_list.append(f"{key}={val}")
-            join_cond_str = " and ".join(join_cond_list)
-            join_str = f" join {join_table} ON {join_cond_str} "
+            if join_condition is not None:
+
+                join_cond_list = []
+                for key, val in join_condition.items():
+                    join_cond_list.append(f"{key}={val}")
+                join_cond_str = " and ".join(join_cond_list)
+                join_str = f" join {join_table} ON {join_cond_str} "
+            else:
+                join_str = f' join {join_table} '
             qvery = qvery + join_str
 
 
@@ -141,6 +145,17 @@ class Dbsql:
 
         cursor = self.connection.cursor()
         cursor.execute(query)
+        self.connection.commit()
+
+    def delete_from_db(self, table, condition):
+        keys = []
+        for key in condition.keys():
+            keys.append(key + " = ?")
+        str_keys = ' AND '.join(keys)
+        qvery = f"DELETE FROM {table} WHERE {str_keys}"
+
+        cursor = self.connection.cursor()
+        cursor.execute(qvery, tuple(condition.values()))
         self.connection.commit()
 
 
