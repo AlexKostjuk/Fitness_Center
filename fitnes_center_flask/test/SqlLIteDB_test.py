@@ -67,6 +67,7 @@ class Dbsql:
             str_conditions = " and ".join(conditions)
             str_conditions = " where " + str_conditions
             qvery = qvery + str_conditions
+        print(qvery)
         cursor = self.connection.cursor()
         cursor.execute(qvery)
         res = cursor.fetchall()

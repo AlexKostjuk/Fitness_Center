@@ -10,13 +10,25 @@
         <th>Название</th>
         <th>Адрес</th>
     </tr>
-    {% for service in res %}
+    {% for trainer in res %}
+        <tr>
+            <td><a href="/fitness_center/{{ trainer.fitness_center_id }}/trainer/{{ trainer.id }}">{{ trainer.name }}</a></td>
+            <td>{{ trainer.address }}</td>
+        </tr>
+    {% endfor %}
+</table>
+<!--fitness center info {{res}}-->
+<table>
+    <tr>
+        <th>Название</th>
+        <th>Адрес</th>
+    </tr>
+    {% for service in res_s %}
         <tr>
             <td><a href="/fitness_center/{{ service.fitness_center_id }}/service/{{ service.id }}">{{ service.name }}</a></td>
             <td>{{ service.address }}</td>
         </tr>
     {% endfor %}
 </table>
-<!--fitness center info {{res}}-->
 </body>
 </html>
