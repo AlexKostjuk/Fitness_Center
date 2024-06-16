@@ -7,13 +7,13 @@
 <body>
 <table>
     <tr>
-        <th>Название</th>
-        <th>Адрес</th>
+        <th>Имя___</th>
+        <th>Пол___</th>
     </tr>
     {% for trainer in res %}
         <tr>
             <td><a href="/fitness_center/{{ trainer.fitness_center_id }}/trainer/{{ trainer.id }}">{{ trainer.name }}</a></td>
-            <td>{{ trainer.address }}</td>
+            <td>{{ trainer.sex }}</td>
         </tr>
     {% endfor %}
 </table>
@@ -21,12 +21,12 @@
 <table>
     <tr>
         <th>Название</th>
-        <th>Адрес</th>
+        <th>Цена</th>
     </tr>
     {% for service in res_s %}
         <tr>
             <td><a href="/fitness_center/{{ service.fitness_center_id }}/service/{{ service.id }}">{{ service.name }}</a></td>
-            <td>{{ service.address }}</td>
+            <td>{{ service.price }}</td>
         </tr>
     {% endfor %}
 </table>
