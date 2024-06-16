@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, session, redirect
 from SqlLIteDB_test import Dbsql, login_required
+from utils_test import clac_slots
 
 import sqlite3
 
@@ -127,6 +128,10 @@ def user_deposit_info():
 
 @app.post('/reservations')
 def add_reservations():
+    # from_dict = request.form
+    # servise_id = from_dict['service_id']
+    # trainer_id = from_dict['trainer_id']
+
     return ' new reservations was successfully'
 
 

@@ -40,6 +40,11 @@ def clac_slots(user_id, trainer_id, service_id):
         condition = {'trainer_id': trainer_id, 'service_id': service_id}
         trainer_capacity = db.fetch_one(table, colons, condition)
 
+        table = 'service'
+        colons = None
+        condition = {'id': service_id}
+        service_info = db.fetch_one(table, colons, condition)
+
         start_dt = datetime.datetime.strptime(trainer_schedule["date"] + ' ' + trainer_schedule["start_time"], '%d.%m.%Y %H:%M')
         end_dt = datetime.datetime.strptime(trainer_schedule["date"] + ' ' + trainer_schedule["end_time"], '%d.%m.%Y %H:%M')
         cur_dt = start_dt
@@ -60,11 +65,34 @@ def clac_slots(user_id, trainer_id, service_id):
                 trainer_schedul[cur_dt] -= 1
                 cur_dt += datetime.timedelta(minutes=15)
 
+        result_time = []
+        srvice_duration = service_info['duration']
+        srvice_start_time = start_dt
+        while srvice_start_time < end_dt:
+            service_end_time = srvice_start_time + datetime.timedelta(minutes=srvice_duration)
+            everyting_is_free = True
+            iter_start_time = srvice_start_time
+            while iter_start_time < service_end_time:
+                if trainer_schedul[iter_start_time] == 0 or service_end_time > end_dt:
+                    everyting_is_free = False
+                    break
+
+                iter_start_time +=datetime.timedelta(minutes=15)
 
 
+            if everyting_is_free:
+                result_time.append(srvice_start_time)
+
+            srvice_start_time += datetime.timedelta(minutes=15)
+        final_result = [datetime.datetime.strftime(el, '%H:%M') for el in result_time]
+
+        print(trainer_schedule)
+        print(booket_time)
+        print(trainer_schedul)
+        print(result_time)
+        print(final_result)
+        return final_result
 
         # time_duration = datetime.datetime(year=2024, month=5, day=31, minute=0 ) + datetime.timedelta(minutes=15)
-    print(trainer_schedule)
-    print(booket_time)
-    print(trainer_schedul)
+
 clac_slots(1,1,2)
