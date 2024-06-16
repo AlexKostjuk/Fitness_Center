@@ -243,9 +243,10 @@ def get_fitness_center_info(gym_id):
     table = 'fitness_center'
     colons = None
     condition = {'fitness_center.id': gym_id}
-    join_condition = {'service.fitness_center_id': gym_id}
+    join_condition = {'fitness_center_id': gym_id}
     with Dbsql('db') as db:
-        res = db.fetch_oll(table, colons, condition, join_table = 'service',join_condition=join_condition)
+        res = db.fetch_oll(table, colons, condition, join_table = ['service', 'trainer'],join_condition=join_condition)
+        print(res)
     return render_template("gym_id.html", res = res, gym_id=gym_id)
 
 

@@ -40,12 +40,24 @@ class Dbsql:
         conditions = []
 
         if join_table is not None:
-            join_cond_list = []
-            for key, val in join_condition.items():
-                join_cond_list.append(f"{key}={val}")
-            join_cond_str = " and ".join(join_cond_list)
-            join_str = f" join {join_table} ON {join_cond_str} "
-            qvery = qvery + join_str
+            if type(join_table) is not list:
+                join_cond_list = []
+                for key, val in join_condition.items():
+                    join_cond_list.append(f"{key}={val}")
+                join_cond_str = " and ".join(join_cond_list)
+                join_str = f" join {join_table} ON {join_cond_str} "
+                qvery = qvery + join_str
+            else:
+                join_cond_list = []
+                for key, val in join_condition.items():
+                    join_cond_list.append(f"{key}={val}")
+                join_cond_str = " and ".join(join_cond_list)
+                join_str_fin = ''
+                for i in join_table:
+
+                    join_str = f" join {str(i)} ON {str(i)}.{join_cond_str} "
+                    join_str_fin += join_str
+                qvery = qvery + join_str_fin
 
 
 
