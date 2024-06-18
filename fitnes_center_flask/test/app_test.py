@@ -128,9 +128,23 @@ def user_deposit_info():
 
 @app.post('/reservations')
 def add_reservations():
+    user_id = session.get('user_id', None)
+    from_data = request.form
+    table_bd = "reservation"
+    k_r = {'user_id': user_id, 'point': from_data['point'], 'text': from_data['text'],
+           'trainer_id': from_data['trainer_id'], 'gym_id': from_data['gym_id']}
+    with Dbsql('db') as db:
+        table = 'review_rating'
+        colons = None
+        condition = {'gym_id': from_data['gym_id'], 'trainer_id': from_data['trainer_id'], 'user_id': user_id}
+        res = db.fetch_one(table, colons, condition)
+        db.insert_to_db(table_bd, k_r)
+        return render_template('score_add.html', gym_id=from_data['gym_id'], trainer_id=from_data['trainer_id'])
+
     # from_dict = request.form
     # servise_id = from_dict['service_id']
     # trainer_id = from_dict['trainer_id']
+
 
     return ' new reservations was successfully'
 
@@ -306,9 +320,11 @@ def get_coach_info(gym_id, trainer_id):
     #     res = db.fetch_oll(a)
     table = 'trainer'
     colons = None
-    condition = {'fitness_center_id': gym_id, 'id': trainer_id}
+    condition = {'fitness_center_id': gym_id, 'trainer.id': trainer_id}
+    join_condition = {'trainer_id': trainer_id}
+
     with Dbsql('db') as db:
-        res = db.fetch_oll(table, colons, condition)
+        res = db.fetch_oll(table, colons, condition, join_table=['trainer_service'], join_condition=join_condition)
 
     return render_template("trainer_id.html", res = res, trainer_id=trainer_id, gym_id=gym_id)
 
@@ -372,6 +388,35 @@ def get_loyality_programs(gym_id):
     return render_template('loyality_programs.html', res=res)
 
 
+@app.post('/pre_reservation')
+@login_required
+
+def pre_reservation():
+    user_id = session.get('user_id', None)
+    from_data = request.form
+    trainer = from_data['trainer_id']
+    service = from_data['service_id']
+    # desired_date = from_data['desired_date']
+
+    time_slots = clac_slots(trainer, service)
+
+    return render_template('pre_reservation.html', form_info={'trainer_id':trainer, 'service_id':service, 'time_slots':time_slots})
+
+
+@app.get('/pre_reservation')
+@login_required
+
+def pre_reservation_2():
+    user_id = session.get('user_id', None)
+    trainer = request.args.get('gym_id', '')
+    service = request.args.get('trainer_id', '')
+    # from_data = request.form
+    # trainer = from_data['trainer_id']
+    # service = from_data['service_id']
+    desired_date = '31.05.2024'#from_data['desired_date']
+
+    time_slots = clac_slots(trainer, service), #@desired_date)
+    return render_template("pre_reservation.html", form_info={'trainer_id':trainer, 'service_id':service, 'desired_date':desired_date, 'time_slots':time_slots})
 
 if __name__ == '__main__':
     app.run()

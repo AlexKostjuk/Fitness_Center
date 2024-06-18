@@ -20,7 +20,7 @@ def check_existence(username, password):
 
 
 
-def clac_slots(user_id, trainer_id, service_id):
+def clac_slots(trainer_id, service_id):
 
     with Dbsql('db') as db:
 
@@ -45,25 +45,30 @@ def clac_slots(user_id, trainer_id, service_id):
         condition = {'id': service_id}
         service_info = db.fetch_one(table, colons, condition)
 
+
         start_dt = datetime.datetime.strptime(trainer_schedule["date"] + ' ' + trainer_schedule["start_time"], '%d.%m.%Y %H:%M')
         end_dt = datetime.datetime.strptime(trainer_schedule["date"] + ' ' + trainer_schedule["end_time"], '%d.%m.%Y %H:%M')
         cur_dt = start_dt
-        trainer_schedul = {}
+        trainer_schedule = {}
 
         while cur_dt < end_dt:
-            trainer_schedul[cur_dt] = trainer_capacity['max_attendees']
+            trainer_schedule[cur_dt] = trainer_capacity['max_attendees']
             cur_dt = cur_dt + datetime.timedelta(minutes=15)
 
-        for one_booking in booket_time:
-            booking_date = one_booking['date']
-            booking_time = one_booking['time']
-            booking_duration = one_booking['duration']
-            one_booking_start = datetime.datetime.strptime(booking_date + " " + booking_time,  '%d.%m.%Y %H:%M')
-            booking_end = one_booking_start + datetime.timedelta(minutes=booking_duration)
-            cur_dt = one_booking_start
-            while cur_dt < booking_end:
-                trainer_schedul[cur_dt] -= 1
-                cur_dt += datetime.timedelta(minutes=15)
+        if booket_time is not None:
+
+            for one_booking in booket_time:
+                booking_date = one_booking['date']
+                booking_time = one_booking['time']
+                booking_duration = one_booking['duration']
+                one_booking_start = datetime.datetime.strptime(booking_date + " " + booking_time,  '%d.%m.%Y %H:%M')
+                booking_end = one_booking_start + datetime.timedelta(minutes=booking_duration)
+                cur_dt = one_booking_start
+                while cur_dt < booking_end:
+                    trainer_schedule[cur_dt] -= 1
+                    cur_dt += datetime.timedelta(minutes=15)
+        else:
+           print(trainer_schedule, cur_dt)
 
         result_time = []
         srvice_duration = service_info['duration']
@@ -73,7 +78,7 @@ def clac_slots(user_id, trainer_id, service_id):
             everyting_is_free = True
             iter_start_time = srvice_start_time
             while iter_start_time < service_end_time:
-                if trainer_schedul[iter_start_time] == 0 or service_end_time > end_dt:
+                if trainer_schedule[iter_start_time] == 0 or service_end_time > end_dt:
                     everyting_is_free = False
                     break
 
@@ -88,11 +93,11 @@ def clac_slots(user_id, trainer_id, service_id):
 
         print(trainer_schedule)
         print(booket_time)
-        print(trainer_schedul)
+        print(trainer_schedule)
         print(result_time)
         print(final_result)
         return final_result
 
         # time_duration = datetime.datetime(year=2024, month=5, day=31, minute=0 ) + datetime.timedelta(minutes=15)
 
-clac_slots(1,1,2)
+clac_slots(2,2)
