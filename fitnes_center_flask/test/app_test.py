@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, session, redirect
 from SqlLIteDB_test import Dbsql, login_required
 from utils_test import clac_slots
+from datetime import datetime
+
 
 import sqlite3
 
@@ -131,15 +133,12 @@ def add_reservations():
     user_id = session.get('user_id', None)
     from_data = request.form
     table_bd = "reservation"
-    k_r = {'user_id': user_id, 'point': from_data['point'], 'text': from_data['text'],
-           'trainer_id': from_data['trainer_id'], 'gym_id': from_data['gym_id']}
+    k_r = {'user_id': user_id, 'date': from_data['date'], 'time': from_data['slots'],
+           'trainer_id': from_data['trainer_id'], 'service_id': from_data['service_id']}
     with Dbsql('db') as db:
-        table = 'review_rating'
-        colons = None
-        condition = {'gym_id': from_data['gym_id'], 'trainer_id': from_data['trainer_id'], 'user_id': user_id}
-        res = db.fetch_one(table, colons, condition)
+
         db.insert_to_db(table_bd, k_r)
-        return render_template('score_add.html', gym_id=from_data['gym_id'], trainer_id=from_data['trainer_id'])
+    return render_template('home.html')
 
     # from_dict = request.form
     # servise_id = from_dict['service_id']
@@ -292,9 +291,11 @@ def get_service_info(gym_id, service_id):
     #     res = db.fetch_oll(a)
     table = 'service'
     colons = None
-    condition = {'fitness_center_id': gym_id, 'id': service_id}
+    condition = {'fitness_center_id': gym_id, 'service.id': service_id}
+    join_condition = {'service_id': service_id}
+
     with Dbsql('db') as db:
-        res = db.fetch_oll(table, colons, condition)
+        res = db.fetch_oll(table, colons, condition, join_table=['trainer_service'], join_condition=join_condition)
 
     return render_template("service_id.html", res = res, service_id=service_id, gym_id=gym_id)
 
@@ -396,11 +397,14 @@ def pre_reservation():
     from_data = request.form
     trainer = from_data['trainer_id']
     service = from_data['service_id']
-    # desired_date = from_data['desired_date']
+    desired_date = from_data['desired_date']
+    original_date = desired_date
+    parsed_date = datetime.strptime(original_date, "%Y-%m-%d")
+    formatted_date = parsed_date.strftime("%d.%m.%Y")
 
-    time_slots = clac_slots(trainer, service)
+    time_slots = clac_slots(trainer, service, formatted_date)
 
-    return render_template('pre_reservation.html', form_info={'trainer_id':trainer, 'service_id':service, 'time_slots':time_slots})
+    return render_template('pre_reservation.html', form_info={'trainer_id':trainer, 'service_id':service, 'time_slots':time_slots, 'formatted_date': formatted_date})
 
 
 @app.get('/pre_reservation')

@@ -13,7 +13,7 @@ def dict_factory(cursor, row):
 
 
 def get_from_db(qvery, many=True):
-    con = sqlite3.connect('../../../db')
+    con = sqlite3.connect('../09,08/db')
     con.row_factory = dict_factory
     cur = con.cursor()
     cur.execute(qvery)
@@ -26,7 +26,7 @@ def get_from_db(qvery, many=True):
 
 
 def insert_to_db(qvery):
-    con = sqlite3.connect('../../../db')
+    con = sqlite3.connect('../09,08/db')
     cur = con.cursor()
     cur.execute(qvery)
     con.commit()

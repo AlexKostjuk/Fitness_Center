@@ -40,24 +40,12 @@ class Dbsql:
         conditions = []
 
         if join_table is not None:
-            if type(join_table) is not list:
-                join_cond_list = []
-                for key, val in join_condition.items():
-                    join_cond_list.append(f"{key}={val}")
-                join_cond_str = " and ".join(join_cond_list)
-                join_str = f" join {join_table} ON {join_cond_str} "
-                qvery = qvery + join_str
-            else:
-                join_cond_list = []
-                for key, val in join_condition.items():
-                    join_cond_list.append(f"{key}={val}")
-                join_cond_str = " and ".join(join_cond_list)
-                join_str_fin = ''
-                for i in join_table:
-
-                    join_str = f" join {str(i)} ON {str(i)}.{join_cond_str} "
-                    join_str_fin += join_str
-                qvery = qvery + join_str_fin
+            join_cond_list = []
+            for key, val in join_condition.items():
+                join_cond_list.append(f"{key}={val}")
+            join_cond_str = " and ".join(join_cond_list)
+            join_str = f" join {join_table} ON {join_cond_str} "
+            qvery = qvery + join_str
 
 
 
@@ -67,7 +55,6 @@ class Dbsql:
             str_conditions = " and ".join(conditions)
             str_conditions = " where " + str_conditions
             qvery = qvery + str_conditions
-        print(qvery)
         cursor = self.connection.cursor()
         cursor.execute(qvery)
         res = cursor.fetchall()
@@ -77,8 +64,7 @@ class Dbsql:
 
 
     def fetch_one(self, table, colons = None, condition = None, join_table = None, join_condition = None):
-        # join_condition =
-        # qvery = f'select * from {table}'
+
         if colons is not None:
             print(colons, len(colons))
             if type(colons) == list:
@@ -119,13 +105,6 @@ class Dbsql:
             return res
         return None
 
-    # def fetch_one(self, qvery, *args, **kwargs):
-    #     cursor = self.connection.cursor()
-    #     cursor.execute(qvery, *args, **kwargs)
-    #     res = cursor.fetchone()
-    #     if res:
-    #         return res
-    #     return None
 
     def insert_to_db(self, table, data):
         keys = []

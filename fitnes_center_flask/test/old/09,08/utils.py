@@ -1,12 +1,11 @@
 import datetime
 
-from SqlLIteDB import Dbsql, login_required
-
+from SqlLIteDB import Dbsql
 
 
 def clac_slots(user_id, trainer_id, service_id):
 
-    with Dbsql('db') as db:
+    with Dbsql('test/old/09,08/db') as db:
 
         table = 'reservation'
         colons = None

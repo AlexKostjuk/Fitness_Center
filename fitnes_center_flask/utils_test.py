@@ -1,7 +1,7 @@
 import datetime
 
 from flask import Flask, request, render_template, session, redirect
-from SqlLIteDB_test import Dbsql, login_required
+from SqlLIteDB import Dbsql, login_required
 
 import sqlite3
 
