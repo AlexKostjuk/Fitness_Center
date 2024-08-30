@@ -420,7 +420,7 @@ def pre_reservation_2():
     desired_date = '31.05.2024'#from_data['desired_date']
 
     time_slots = clac_slots(trainer, service), #@desired_date)
-    return render_template("pre_reservation.html", form_info={'trainer_id':trainer, 'service_id':service, 'desired_date':desired_date, 'time_slots':time_slots})
+    return render_template("reservation.html", form_info={'trainer_id':trainer, 'service_id':service, 'desired_date':desired_date, 'time_slots':time_slots})
 
 if __name__ == '__main__':
     app.run()

@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, session, redirect
 from SqlLIteDB import Dbsql, login_required
 from utils_test import clac_slots
 from datetime import datetime
-
+from send_email import send_email
 
 import sqlite3
 
@@ -25,6 +25,8 @@ def home():
     # user_id = session.get('user_id', None)
 
     return render_template('home.html')
+
+
 
 
 @app.post('/register')
@@ -138,6 +140,7 @@ def add_reservations():
     with Dbsql('db') as db:
 
         db.insert_to_db(table_bd, k_r)
+        send_email.delay(k_r)
     return render_template('home.html')
 
     # from_dict = request.form
